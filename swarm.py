@@ -116,5 +116,5 @@ if __name__ == "__main__":
     start_positions = [(0, 0), (10, 19), (0, 19), (19, 0), (19, 19), (9, 9), (5, 5), (15, 15), (5, 15), (15, 5)]
     t = 50
     T = 1000
-    lookahead = 3
+    lookahead = 1
     main(filename, start_positions, t, T, lookahead)
