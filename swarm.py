@@ -1,6 +1,6 @@
 """" Swarm class met greedy rollout algorithm """
 import time
-from greedy_rollout import Grid, Drone, load_grid_from_file  # Importeer klassen uit je originele bestand
+from greedy_rollout import Grid, Drone, load_grid_from_file  # Importeer klassen
 
 class Swarm:
     """Een Swarm object houdt een groep drones bij en plant hun paden door een grid.
