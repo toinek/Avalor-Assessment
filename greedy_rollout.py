@@ -204,7 +204,5 @@ if __name__ == "__main__":
     start_pos = (6, 0)
     t = 50
     T = 1000
-
-    for i in range(1, 2):
-        lookahead = i  # Aanpasbare parameter t (lookahead)
-        main(filename, start_pos, t, T, lookahead)
+    lookahead = 1
+    main(filename, start_pos, t, T, lookahead)

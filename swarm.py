@@ -111,7 +111,7 @@ def main(filename, start_positions, t, T, lookahead):
 
 
 if __name__ == "__main__":
-    filename = "20.txt"
+    filename = "100.txt"
     start_positions = [(0, 0), (10, 19), (0, 19), (19, 0), (19, 19), (9, 9), (5, 5), (15, 15), (5, 15), (15, 5)]
     t = 50
     T = 1000
