@@ -30,14 +30,12 @@ class Grid:
         initial_scores (np.ndarray): De initiële scores van elk vakje in het grid.
         current_scores (np.ndarray): De huidige scores van elk vakje in het grid.
         visited (np.ndarray): Een boolean array die bijhoudt welke vakjes bezocht zijn.
-        last_visit (np.ndarray): Een array die bijhoudt wanneer elk vakje voor het laatst bezocht is.
         size (int): De grootte van het grid (aantal vakjes in één dimensie).
     """
     def __init__(self, initial_scores):
         self.initial_scores = initial_scores.astype(float)
         self.current_scores = self.initial_scores.copy()
         self.visited = np.zeros_like(self.initial_scores, dtype=bool)
-        self.last_visit = np.zeros_like(self.initial_scores, dtype=float)
         self.size = self.initial_scores.shape[0]
 
     def update_scores(self, growth_rate=0.1):
@@ -46,7 +44,11 @@ class Grid:
         Args:
             growth_rate (float): De groeisnelheid van de scores van bezochte vakken.
         """
-        self.current_scores[self.visited] = np.minimum(self.initial_scores[self.visited], self.current_scores[self.visited] + self.initial_scores[self.visited] * growth_rate)
+        self.current_scores[self.visited] = np.minimum(self.initial_scores[self.visited],
+                                                       self.current_scores[self.visited] + self.initial_scores[self.visited] * growth_rate)
+        # Reset visited naar False waar current_scores gelijk is aan initial_scores
+        fully_restored = self.visited & (self.current_scores == self.initial_scores)
+        self.visited[fully_restored] = False
 
     def get_score(self, x, y):
         """Haal de huidige score op van een vakje.
@@ -60,7 +62,7 @@ class Grid:
         """
         return self.current_scores[x, y]
 
-    def visit(self, x, y, t_current):
+    def visit(self, x, y):
         """Bezoek een vakje, reset de score naar 0 en markeer als bezocht.
 
         Args:
@@ -69,7 +71,6 @@ class Grid:
             t_current: Huidige tijdstap.
         """
         self.current_scores[x, y] = 0
-        self.last_visit[x, y] = t_current
         self.visited[x, y] = True
 
 class Drone:
@@ -89,7 +90,8 @@ class Drone:
         self.position = start_pos
         self.path = [start_pos]
         self.grid = grid
-        self.total_score = self.grid.get_score(*start_pos)
+        self.total_score = 0
+        self.grid.visit(*self.position)  # Markeer de startpositie als bezocht
 
     def evaluate_path(self, start_pos, depth, t_current):
         """"Evalueert recursief de beste score van een pad vanaf een startpositie.
@@ -155,7 +157,7 @@ class Drone:
         best_idx = np.argmax(path_scores)
         return tuple(valid_positions[best_idx])
 
-    def move_to(self, new_pos, t_current):
+    def move_to(self, new_pos):
         """"Verplaatst de drone naar een nieuwe positie en update de score en het pad.
 
         Args:
@@ -166,7 +168,7 @@ class Drone:
         self.position = new_pos
         self.path.append(new_pos)
         self.total_score += new_score
-        self.grid.visit(*self.position, t_current)
+        self.grid.visit(*self.position)
 
     def plan_path(self, t, T, lookahead=5):
         """"Plant een pad voor de drone voor t stappen, met een tijdslimiet van T milliseconden.
@@ -185,9 +187,9 @@ class Drone:
             if (time.time() - start_time) * 1000 > T:
                 print(f"Gestopt na {step} stappen vanwege tijdslimiet T={T}ms")
                 break
-            next_pos = self.get_next_move(lookahead, step)
-            self.move_to(next_pos, step)
             self.grid.update_scores()
+            next_pos = self.get_next_move(lookahead, step)
+            self.move_to(next_pos)
         return self.path, self.total_score
 
 def main(filename, start_pos, t, T, lookahead):
@@ -200,9 +202,9 @@ def main(filename, start_pos, t, T, lookahead):
     print(f"Totale score: {score}")
 
 if __name__ == "__main__":
-    filename = "1000.txt"
-    start_pos = (6, 0)
+    filename = "20.txt"
+    start_pos = (1, 0)
     t = 50
     T = 1000
-    lookahead = 1
+    lookahead = 4
     main(filename, start_pos, t, T, lookahead)

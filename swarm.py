@@ -31,6 +31,7 @@ class Swarm:
         """
         # Haal voorgestelde zetten op voor alle drones
         proposed_moves = [drone.get_next_move(lookahead, t_current) for drone in self.drones]
+
         # Controleer op conflicten (meerdere drones naar hetzelfde vak)
         move_counts = {}
         for i, move in enumerate(proposed_moves):
@@ -39,11 +40,11 @@ class Swarm:
             else:
                 move_counts[move] = [i]
 
-        # Los conflicten op: alleen de eerste drone krijgt voorrang
+        # Los conflicten op: de eerste drone krijgt voorrang
         final_moves = proposed_moves.copy()
         for move, drone_indices in move_counts.items():
             if len(drone_indices) > 1:  # Conflict
-                # Alle drones na de eerste krijgen hun huidige positie (geen beweging)
+                # Alle drones na de eerste bewegen niet
                 for idx in drone_indices[1:]:
                     final_moves[idx] = self.drones[idx].position
 
@@ -90,7 +91,7 @@ class Swarm:
                 drone.position = new_pos
                 drone.path.append(new_pos)
                 drone.total_score += new_score
-                self.grid.visit(*new_pos, step)
+                self.grid.visit(*new_pos)
                 total_score += new_score
 
         # Verzamel paden en totale score
